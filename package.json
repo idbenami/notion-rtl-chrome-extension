@@ -1,0 +1,16 @@
+{
+  "name": "notion-rtl-chrome-extension",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "private": false,
+  "scripts": {
+    "build": "npm run build:tsc; npm run build:copy-manifest",
+    "build:tsc": "tsc",
+    "build:copy-manifest": "cp ./manifest.json ./build",
+    "format": "prettier --write './src/**/*.js'"
+  },
+  "devDependencies": {
+    "prettier": "3.3.3",
+    "typescript": "5.5.4"
+  }
+}
