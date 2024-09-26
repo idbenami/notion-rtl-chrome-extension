@@ -13,48 +13,41 @@ const mutationsQueue: MutationRecord[] = [];
 // A mutation to observe newest added blocks to notion-content-page element
 const notionPageContextMutationObserver = new MutationObserver(() => alignPageContentToRight());
 
-function alignListItemsToRight() {
-  const items = getListItems();
-
-  items.forEach((item) => {
-    item.style.textAlign = 'start';
-  });
-}
-
-function getListItems() {
-  return document.querySelectorAll<HTMLElement>(
+const alignListItemsToRight = () => {
+  const items = document.querySelectorAll<HTMLElement>(
     `div[placeholder = "List"],
      div[placeholder = "To-do"],
      div[placeholder = "Toggle"]`,
   );
-}
 
-function setBlocksDirectionToAuto() {
-  const blocks = getTopLevelBlocksWithoutDirAttribute();
-
-  blocks.forEach((block) => {
-    block.setAttribute('dir', 'auto');
+  items.forEach((item) => {
+    item.style.textAlign = 'start';
   });
-}
+};
 
-function getTopLevelBlocksWithoutDirAttribute() {
-  return document.querySelectorAll(
+const setBlocksDirectionToAuto = () => {
+  const blocks = document.querySelectorAll<HTMLElement>(
     `.notion-page-content > div[data-block-id]:not([dir]):not(.notion-column_list-block):not(.notion-collection_view_page-block),
     [placeholder="Untitled"]:not([dir]),
     .notion-column-block > div[data-block-id]:not([dir]),
     notion-collection_view-block:not([dir]),
     .notion-table-view:not([dir]),
     .notion-board-view:not([dir]),
-    .notion-gallery-view:not([dir])`,
+    .notion-gallery-view:not([dir]),
+    h1[placeholder = "New page"]:not([dir])`,
   );
-}
 
-function alignPageContentToRight() {
+  blocks.forEach((block) => {
+    block.setAttribute('dir', 'auto');
+  });
+};
+
+const alignPageContentToRight = () => {
   setBlocksDirectionToAuto();
   alignListItemsToRight();
-}
+};
 
-function getNotionPageElement(node: Node) {
+const getNotionPageElement = (node: Node): Element | null => {
   if (typeof node !== 'object') return null;
   if (!(node instanceof HTMLElement)) return null;
 
@@ -64,7 +57,7 @@ function getNotionPageElement(node: Node) {
   }
 
   return null;
-}
+};
 
 // Idle observe changes on notion page then align items, reason we're doing that is we shouldn't
 // block any process for the main engine also we don't want to risk the performance when applying
@@ -74,13 +67,13 @@ const idleAlginItemsToRight: IdleRequestCallback = () => {
     const { addedNodes } = mutation;
 
     if (typeof addedNodes[0] !== 'undefined') {
-      const $notionPageElem = getNotionPageElement(addedNodes[0]);
+      const notionPageElement = getNotionPageElement(addedNodes[0]);
 
-      if ($notionPageElem) {
+      if (notionPageElement) {
         alignPageContentToRight();
 
         notionPageContextMutationObserver.disconnect();
-        notionPageContextMutationObserver.observe($notionPageElem, {
+        notionPageContextMutationObserver.observe(notionPageElement, {
           childList: true,
           subtree: false,
         });
@@ -92,9 +85,9 @@ const idleAlginItemsToRight: IdleRequestCallback = () => {
   mutationsQueue.splice(0, mutationsQueue.length);
 };
 
-function isMutationQueueEmpty() {
+const isMutationQueueEmpty = () => {
   return !mutationsQueue.length;
-}
+};
 
 // Entry point for the mutation observer
 const onNotionDocumentLoaded: MutationCallback = (mutationsList) => {
